@@ -1,0 +1,39 @@
+version: '3'
+services:
+  db:
+    image: postgres:11
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_DATABASE}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    # volumes:
+    # - db-data:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    entrypoint: sh entrypoint.sh
+    volumes:
+      - ./src:/var/www/app/src
+    ports:
+      - 8090:8090
+    links:
+      - db
+    environment:
+      ENVIRONMENT: ${ENVIRONMENT}
+      PORT: ${PORT}
+      DB_HOST: ${DB_HOST}
+      DB_USER: ${DB_DATABASE}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_DATABASE: ${DB_DATABASE}
+      DB_PORT: ${DB_PORT}
+      SECRET: ${SECRET}
+  redis:
+    image: 'redis:alpine'
+
+volumes:
+  db-data:
+    driver: local

@@ -1,0 +1,5 @@
+export enum Subscriptions {
+  PLAYER_ADDED = 'PLAYER_ADDED',
+  PLAYER_UPDATED = 'PLAYER_UPDATED',
+  ARROW_UPDATED = 'ARROW_UPDATED',
+}
