@@ -3,15 +3,10 @@ import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
 import { GraphQLError } from 'graphql';
 import { RedisPubSub } from 'graphql-redis-subscriptions';
 import { GameEngineService } from '../game-engine/game-engine.service';
-import { UtilitiesService } from '../utilities/utilities.service';
-import { Arrow } from '../arrow/arrow.model';
-import { ArrowService } from '../arrow/arrow.service';
 import { ErrorCode } from '../enums/error-codes.enum';
 import { Subscriptions } from '../enums/subscriptions.enum';
 import { Game } from '../game/game.model';
 import { GameService } from '../game/game.service';
-import { ObjectTile } from '../object-tile/object-tile.model';
-import { ObjectTileService } from '../object-tile/object-tile.service';
 import { Player } from '../player/player.model';
 import { PlayerService } from '../player/player.service';
 import { PUB_SUB } from '../pub-sub/pub-sub.module';
@@ -43,28 +38,43 @@ export class ActionResolver {
     if (!game) {
       throw new GraphQLError(ErrorCode.GAME_NOT_FOUND);
     }
+    if (game.isResolvingActions) {
+      throw new GraphQLError(ErrorCode.ROUND_STARTED);
+    }
     const playerActions: Action[] = await this.service.get({
       gameId: payload.gameId,
       isResolved: false,
       playerId: payload.playerId,
     });
-    if (playerActions.length >= 4) {
-      throw new GraphQLError(ErrorCode.MAX_ACTIONS);
-    }
+
     const player: Player = await this.playerService.get(payload.playerId);
     const players: Player[] = await this.playerService.getPlayers(
       payload.gameId,
       { isDead: false },
     );
 
-    const action: Action = await this.service.create(payload, player);
     const actions: Action[] = await this.service.get({
       gameId: payload.gameId,
       isResolved: false,
     });
 
     if (actions.length >= 4 * players.length) {
-      this.pubSub.publish(Subscriptions.RESOLVE_ACTIONS, {
+      console.log('RESOLVING ACTIONS!');
+      await this.gameService.update({ isResolvingActions: true }, game);
+      await this.pubSub.publish(Subscriptions.RESOLVE_ACTIONS, {
+        resolveActions: game,
+      });
+    }
+    if (playerActions.length >= 4) {
+      throw new GraphQLError(ErrorCode.MAX_ACTIONS);
+    }
+    const action: Action = await this.service.create(payload, player);
+    await this.pubSub.publish(Subscriptions.ACTION_ADDED, {
+      actionAdded: action,
+    });
+    if ([...actions, action].length >= 4 * players.length) {
+      await this.gameService.update({ isResolvingActions: true }, game);
+      await this.pubSub.publish(Subscriptions.RESOLVE_ACTIONS, {
         resolveActions: game,
       });
     }

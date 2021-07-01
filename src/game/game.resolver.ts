@@ -19,6 +19,7 @@ import { Game } from './game.model';
 import { GameService } from './game.service';
 import { ObjectTile } from '../object-tile/object-tile.model';
 import { Arrow } from '../arrow/arrow.model';
+import { Action } from 'src/action/action.model';
 
 @Resolver((of) => Game)
 export class GameResolver {
@@ -99,5 +100,14 @@ export class GameResolver {
   })
   resolveActions(@Args('gameId') _: string) {
     return this.pubSub.asyncIterator(Subscriptions.RESOLVE_ACTIONS);
+  }
+
+  @Subscription(() => Action, {
+    filter: (payload, variables) => {
+      return payload.actionAdded.gameId === variables.gameId;
+    },
+  })
+  actionAdded(@Args('gameId') _: string) {
+    return this.pubSub.asyncIterator(Subscriptions.ACTION_ADDED);
   }
 }

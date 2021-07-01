@@ -39,6 +39,10 @@ export class Game {
   @OneToMany((type) => Arrow, (arrow) => arrow.game)
   arrows: Arrow[];
 
+  @Field((type) => Boolean)
+  @Column('boolean', { default: false })
+  isResolvingActions: boolean;
+
   @Field()
   @Column({ default: 12 })
   boardSize: number;

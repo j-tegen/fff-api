@@ -21,6 +21,10 @@ export class GameService {
     return this.repository.save(game);
   }
 
+  async update(patch: Partial<Game>, game: Game): Promise<Game> {
+    return this.repository.save({ ...game, ...patch });
+  }
+
   async get(id: string): Promise<Game> {
     return this.repository.findOne(id);
   }

@@ -2,6 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { RedisPubSub } from 'graphql-redis-subscriptions';
 import { DateTime } from 'luxon';
 import { ActionService } from 'src/action/action.service';
+import { GameService } from 'src/game/game.service';
 import { ActionType } from '../action/action.enums';
 import { Action } from '../action/action.model';
 import { Arrow } from '../arrow/arrow.model';
@@ -23,6 +24,7 @@ export class GameEngineService {
     private readonly actionService: ActionService,
     private readonly utilService: UtilitiesService,
     private readonly objectTileService: ObjectTileService,
+    private readonly gameService: GameService,
     @Inject(PUB_SUB) private readonly pubSub: RedisPubSub,
   ) {}
 
@@ -41,7 +43,7 @@ export class GameEngineService {
           objectTiles,
           action.direction,
         );
-        this.pubSub.publish(Subscriptions.PLAYER_UPDATED, {
+        await this.pubSub.publish(Subscriptions.PLAYER_UPDATED, {
           playerUpdated: updatedPlayer,
         });
         allPlayers = this.mergePlayers(allPlayers, updatedPlayer);
@@ -71,7 +73,8 @@ export class GameEngineService {
       const end: number = DateTime.now().toMillis();
       await this.utilService.sleep(150 - (end - start));
     }
-    this.pubSub.publish(Subscriptions.ACTIONS_RESOLVED, {
+    await this.gameService.update({ isResolvingActions: false }, game);
+    await this.pubSub.publish(Subscriptions.ACTIONS_RESOLVED, {
       actionsResolved: game,
     });
   }
@@ -105,7 +108,7 @@ export class GameEngineService {
       return this.arrowService.update({ isResolved: true }, arrow);
     }
     const updatedArrow: Arrow = await this.arrowService.move(arrow, game);
-    this.pubSub.publish(Subscriptions.ARROW_UPDATED, {
+    await this.pubSub.publish(Subscriptions.ARROW_UPDATED, {
       arrowUpdated: updatedArrow,
     });
     const player: Player = await this.utilService.blockingCharacter(
@@ -117,7 +120,9 @@ export class GameEngineService {
         { isDead: true },
         player,
       );
-      this.pubSub.publish(Subscriptions.PLAYER_UPDATED, { playerUpdated });
+      await this.pubSub.publish(Subscriptions.PLAYER_UPDATED, {
+        playerUpdated,
+      });
     }
     return updatedArrow;
   }

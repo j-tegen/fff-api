@@ -31,6 +31,7 @@ export class Action {
   @ManyToOne((type) => Player, (player) => player.actions)
   player: Player;
 
+  @Field()
   @Column()
   playerId: string;
 

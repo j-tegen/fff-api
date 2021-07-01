@@ -26,7 +26,9 @@ export class PlayerResolver {
       throw new GraphQLError(ErrorCode.GAME_NOT_FOUND);
     }
     const player: Player = await this.service.create(payload, game);
-    this.pubSub.publish(Subscriptions.PLAYER_ADDED, { playerAdded: player });
+    await this.pubSub.publish(Subscriptions.PLAYER_ADDED, {
+      playerAdded: player,
+    });
     return player;
   }
 }
