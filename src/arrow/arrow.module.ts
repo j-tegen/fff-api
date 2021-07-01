@@ -3,10 +3,10 @@ import { ArrowService } from './arrow.service';
 import { ArrowResolver } from './arrow.resolver';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Arrow } from './arrow.model';
-import { GameEngineService } from '../game-engine/game-engine.service';
+import { UtilitiesService } from '../utilities/utilities.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Arrow])],
-  providers: [ArrowService, ArrowResolver, GameEngineService],
+  providers: [ArrowService, ArrowResolver, UtilitiesService],
 })
 export class ArrowModule {}

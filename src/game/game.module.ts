@@ -7,7 +7,7 @@ import { Player } from '../player/player.model';
 import { PlayerService } from '../player/player.service';
 import { ObjectTile } from '../object-tile/object-tile.model';
 import { ObjectTileService } from '../object-tile/object-tile.service';
-import { GameEngineService } from '../game-engine/game-engine.service';
+import { UtilitiesService } from '../utilities/utilities.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Game, Player, ObjectTile])],
@@ -16,7 +16,7 @@ import { GameEngineService } from '../game-engine/game-engine.service';
     PlayerService,
     GameResolver,
     ObjectTileService,
-    GameEngineService,
+    UtilitiesService,
   ],
 })
 export class GameModule {}

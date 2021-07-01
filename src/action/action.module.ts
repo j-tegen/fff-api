@@ -8,14 +8,15 @@ import { Player } from '../player/player.model';
 import { GameService } from '../game/game.service';
 import { PlayerService } from '../player/player.service';
 import { GameEngineService } from '../game-engine/game-engine.service';
-import { ObjectTile } from '../object-tile/object-tile.model';
-import { ObjectTileService } from '../object-tile/object-tile.service';
+import { UtilitiesService } from '../utilities/utilities.service';
 import { ArrowService } from '../arrow/arrow.service';
+import { ObjectTileService } from '../object-tile/object-tile.service';
 import { Arrow } from '../arrow/arrow.model';
+import { ObjectTile } from '../object-tile/object-tile.model';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Action, Game, Player, ObjectTile, Arrow]),
+    TypeOrmModule.forFeature([Action, Game, Player, Arrow, ObjectTile]),
   ],
   providers: [
     ActionService,
@@ -23,8 +24,9 @@ import { Arrow } from '../arrow/arrow.model';
     GameService,
     PlayerService,
     GameEngineService,
-    ObjectTileService,
+    UtilitiesService,
     ArrowService,
+    ObjectTileService,
   ],
 })
 export class ActionModule {}

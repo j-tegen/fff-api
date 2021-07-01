@@ -11,13 +11,13 @@ import { Tile } from '../types/tile.type';
 import { Game } from '../game/game.model';
 import { Direction } from '../enums/direction.enum';
 import { ObjectTile } from '../object-tile/object-tile.model';
-import { GameEngineService } from '../game-engine/game-engine.service';
+import { UtilitiesService } from '../utilities/utilities.service';
 
 @Injectable()
 export class PlayerService {
   constructor(
     @InjectRepository(Player) private readonly repository: Repository<Player>,
-    private readonly gameEngine: GameEngineService,
+    private readonly utilService: UtilitiesService,
   ) {}
 
   async get(id: string): Promise<Player> {
@@ -44,8 +44,11 @@ export class PlayerService {
     return this.repository.save(player);
   }
 
-  async getPlayers(gameId: string): Promise<Player[]> {
-    return this.repository.find({ where: { gameId } });
+  async getPlayers(
+    gameId: string,
+    optional?: Partial<Player>,
+  ): Promise<Player[]> {
+    return this.repository.find({ where: { gameId, ...optional } });
   }
 
   async update(patch: Partial<Player>, player: Player): Promise<Player> {
@@ -59,16 +62,17 @@ export class PlayerService {
     objectTiles: ObjectTile[],
     direction: Direction,
   ): Promise<Player> {
-    const targetTile: Tile = this.gameEngine.getTargetTile(
+    const targetTile: Tile = this.utilService.getTargetTile(
       player.tile,
       direction,
       game.boardSize,
+      true,
     );
-    const blockingPlayer: Player = this.gameEngine.blockingCharacter(
+    const blockingPlayer: Player = this.utilService.blockingCharacter(
       allPlayers,
       targetTile,
     );
-    const blockingObject: ObjectTile = this.gameEngine.blockingObject(
+    const blockingObject: ObjectTile = this.utilService.blockingObject(
       objectTiles,
       targetTile,
     );
@@ -82,7 +86,7 @@ export class PlayerService {
     if (isDead) {
       return this.update({ isDead, direction }, player);
     }
-    return player;
+    return this.update({ direction }, player);
   }
 
   getStartingPosition(colour: PlayerColour, boardSize: number): Tile {

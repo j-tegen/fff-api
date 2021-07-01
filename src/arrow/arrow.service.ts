@@ -2,18 +2,22 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { nanoid } from 'nanoid';
 import { Direction } from '../enums/direction.enum';
-import { GameEngineService } from '../game-engine/game-engine.service';
 import { Game } from '../game/game.model';
 import { Tile } from '../types/tile.type';
 import { Repository } from 'typeorm';
 import { Arrow } from './arrow.model';
+import { UtilitiesService } from '../utilities/utilities.service';
 
 @Injectable()
 export class ArrowService {
   constructor(
     @InjectRepository(Arrow) private readonly repository: Repository<Arrow>,
-    private readonly gameEngine: GameEngineService,
+    private readonly utilService: UtilitiesService,
   ) {}
+
+  async update(patch: Partial<Arrow>, arrow: Arrow): Promise<Arrow> {
+    return this.repository.save({ ...arrow, ...patch });
+  }
 
   async create(
     gameId: string,
@@ -42,7 +46,7 @@ export class ArrowService {
   }
 
   async move(arrow: Arrow, game: Game): Promise<Arrow> {
-    const targetTile: Tile = this.gameEngine.getTargetTile(
+    const targetTile: Tile = this.utilService.getTargetTile(
       arrow.tile,
       arrow.direction,
       game.boardSize,

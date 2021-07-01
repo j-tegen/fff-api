@@ -13,6 +13,10 @@ export class ActionService {
     @InjectRepository(Action) private readonly repository: Repository<Action>,
   ) {}
 
+  async get(args: Partial<Action>): Promise<Action[]> {
+    return this.repository.find({ where: { ...args } });
+  }
+
   async create(payload: CreateActionInput, player: Player): Promise<Action> {
     const direction: Direction = this.getDirection(player, payload.direction);
     const action: Action = await this.repository.create({
@@ -21,6 +25,10 @@ export class ActionService {
     });
     action.id = nanoid(10);
     return this.repository.save(action);
+  }
+
+  async resolve(action: Action): Promise<Action> {
+    return this.repository.save({ ...action, isResolved: true });
   }
 
   getDirection(player: Player, direction?: Direction): Direction {

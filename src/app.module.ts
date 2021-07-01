@@ -10,6 +10,7 @@ import { PubSubModule } from './pub-sub/pub-sub.module';
 import { ObjectTileModule } from './object-tile/object-tile.module';
 import { ActionModule } from './action/action.module';
 import { ArrowModule } from './arrow/arrow.module';
+import { UtilitiesModule } from './utilities/utilities.module';
 import config from './config';
 
 @Module({
@@ -31,6 +32,7 @@ import config from './config';
     ObjectTileModule,
     ActionModule,
     ArrowModule,
+    UtilitiesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

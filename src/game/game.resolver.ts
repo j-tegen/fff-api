@@ -18,7 +18,7 @@ import { CreateGameInput } from './dto/create-game.input';
 import { Game } from './game.model';
 import { GameService } from './game.service';
 import { ObjectTile } from '../object-tile/object-tile.model';
-import { Arrow } from 'src/arrow/arrow.model';
+import { Arrow } from '../arrow/arrow.model';
 
 @Resolver((of) => Game)
 export class GameResolver {
@@ -81,5 +81,23 @@ export class GameResolver {
   })
   arrowUpdated(@Args('gameId') _: string) {
     return this.pubSub.asyncIterator(Subscriptions.ARROW_UPDATED);
+  }
+
+  @Subscription(() => Game, {
+    filter: (payload, variables) => {
+      return payload.actionsResolved.id === variables.gameId;
+    },
+  })
+  actionsResolved(@Args('gameId') _: string) {
+    return this.pubSub.asyncIterator(Subscriptions.ACTIONS_RESOLVED);
+  }
+
+  @Subscription(() => Game, {
+    filter: (payload, variables) => {
+      return payload.resolveActions.id === variables.gameId;
+    },
+  })
+  resolveActions(@Args('gameId') _: string) {
+    return this.pubSub.asyncIterator(Subscriptions.RESOLVE_ACTIONS);
   }
 }

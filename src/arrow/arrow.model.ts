@@ -33,6 +33,10 @@ export class Arrow {
   @Column()
   gameId: string;
 
+  @Field((type) => Boolean)
+  @Column('boolean', { default: false })
+  isResolved: boolean;
+
   @Field()
   @CreateDateColumn()
   createdAt: Date;
