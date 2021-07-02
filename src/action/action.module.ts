@@ -13,10 +13,19 @@ import { ArrowService } from '../arrow/arrow.service';
 import { ObjectTileService } from '../object-tile/object-tile.service';
 import { Arrow } from '../arrow/arrow.model';
 import { ObjectTile } from '../object-tile/object-tile.model';
+import { GameRoundService } from 'src/game-round/game-round.service';
+import { GameRound } from 'src/game-round/game-round.model';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Action, Game, Player, Arrow, ObjectTile]),
+    TypeOrmModule.forFeature([
+      Action,
+      Game,
+      Player,
+      Arrow,
+      ObjectTile,
+      GameRound,
+    ]),
   ],
   providers: [
     ActionService,
@@ -27,6 +36,7 @@ import { ObjectTile } from '../object-tile/object-tile.model';
     UtilitiesService,
     ArrowService,
     ObjectTileService,
+    GameRoundService,
   ],
 })
 export class ActionModule {}

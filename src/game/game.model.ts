@@ -12,6 +12,7 @@ import { Player } from '../player/player.model';
 import { ObjectTile } from '../object-tile/object-tile.model';
 import { Action } from '../action/action.model';
 import { Arrow } from '../arrow/arrow.model';
+import { GameRound } from 'src/game-round/game-round.model';
 
 @ObjectType()
 @Entity()
@@ -34,6 +35,9 @@ export class Game {
 
   @OneToMany((type) => Action, (action) => action.game)
   actions: Action[];
+
+  @OneToMany((type) => GameRound, (round) => round.game)
+  rounds: GameRound[];
 
   @Field((type) => [Arrow])
   @OneToMany((type) => Arrow, (arrow) => arrow.game)

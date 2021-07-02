@@ -20,6 +20,8 @@ import { GameService } from './game.service';
 import { ObjectTile } from '../object-tile/object-tile.model';
 import { Arrow } from '../arrow/arrow.model';
 import { Action } from 'src/action/action.model';
+import { GameOver } from './dto/game-over.object';
+import { GameRound } from 'src/game-round/game-round.model';
 
 @Resolver((of) => Game)
 export class GameResolver {
@@ -109,5 +111,14 @@ export class GameResolver {
   })
   actionAdded(@Args('gameId') _: string) {
     return this.pubSub.asyncIterator(Subscriptions.ACTION_ADDED);
+  }
+
+  @Subscription(() => GameRound, {
+    filter: (payload, variables) => {
+      return payload.gameOver.gameId === variables.gameId;
+    },
+  })
+  gameOver(@Args('gameId') _: string) {
+    return this.pubSub.asyncIterator(Subscriptions.GAME_OVER);
   }
 }

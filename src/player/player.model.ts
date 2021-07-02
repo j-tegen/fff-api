@@ -15,6 +15,7 @@ import { Game } from '../game/game.model';
 import { Tile } from '../types/tile.type';
 import { Direction } from '../enums/direction.enum';
 import { Action } from '../action/action.model';
+import { GameRound } from 'src/game-round/game-round.model';
 
 @ObjectType()
 @Entity()
@@ -57,6 +58,9 @@ export class Player {
   @Field((type) => Boolean)
   @Column('boolean', { default: false })
   isDead: boolean;
+
+  @OneToMany((type) => GameRound, (round) => round.winner)
+  wonRounds: GameRound[];
 
   @Field()
   @CreateDateColumn()

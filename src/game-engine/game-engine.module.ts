@@ -1,5 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { GameRound } from 'src/game-round/game-round.model';
+import { GameRoundService } from 'src/game-round/game-round.service';
 import { Action } from '../action/action.model';
 import { ActionService } from '../action/action.service';
 import { Arrow } from '../arrow/arrow.model';
@@ -15,7 +17,14 @@ import { GameEngineService } from './game-engine.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Player, Game, ObjectTile, Arrow, Action]),
+    TypeOrmModule.forFeature([
+      Player,
+      Game,
+      ObjectTile,
+      Arrow,
+      Action,
+      GameRound,
+    ]),
   ],
   providers: [
     GameEngineService,
@@ -25,6 +34,7 @@ import { GameEngineService } from './game-engine.service';
     GameService,
     ObjectTileService,
     UtilitiesService,
+    GameRoundService,
   ],
 })
 export class GameEngineModule {}

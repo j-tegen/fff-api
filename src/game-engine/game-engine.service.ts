@@ -2,6 +2,8 @@ import { Inject, Injectable } from '@nestjs/common';
 import { RedisPubSub } from 'graphql-redis-subscriptions';
 import { DateTime } from 'luxon';
 import { ActionService } from 'src/action/action.service';
+import { GameRound } from 'src/game-round/game-round.model';
+import { GameRoundService } from 'src/game-round/game-round.service';
 import { GameService } from 'src/game/game.service';
 import { ActionType } from '../action/action.enums';
 import { Action } from '../action/action.model';
@@ -25,6 +27,7 @@ export class GameEngineService {
     private readonly utilService: UtilitiesService,
     private readonly objectTileService: ObjectTileService,
     private readonly gameService: GameService,
+    private readonly roundService: GameRoundService,
     @Inject(PUB_SUB) private readonly pubSub: RedisPubSub,
   ) {}
 
@@ -76,6 +79,25 @@ export class GameEngineService {
     await this.gameService.update({ isResolvingActions: false }, game);
     await this.pubSub.publish(Subscriptions.ACTIONS_RESOLVED, {
       actionsResolved: game,
+    });
+    const alivePlayers: Player[] = await this.playerService.getPlayers(
+      game.id,
+      {
+        isDead: false,
+      },
+    );
+    if (alivePlayers.length <= 1) {
+      this.handleGameOver(alivePlayers, game);
+    }
+  }
+
+  async handleGameOver(alivePlayers: Player[], game: Game): Promise<void> {
+    const winnerId: string = !!alivePlayers.length
+      ? alivePlayers[0]?.id
+      : undefined;
+    const round: GameRound = await this.roundService.create(game.id, winnerId);
+    await this.pubSub.publish(Subscriptions.GAME_OVER, {
+      gameOver: round,
     });
   }
 

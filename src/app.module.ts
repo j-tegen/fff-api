@@ -11,6 +11,7 @@ import { ObjectTileModule } from './object-tile/object-tile.module';
 import { ActionModule } from './action/action.module';
 import { ArrowModule } from './arrow/arrow.module';
 import { UtilitiesModule } from './utilities/utilities.module';
+import { GameRoundModule } from './game-round/game-round.module';
 import config from './config';
 
 @Module({
@@ -33,6 +34,7 @@ import config from './config';
     ActionModule,
     ArrowModule,
     UtilitiesModule,
+    GameRoundModule,
   ],
   controllers: [AppController],
   providers: [AppService],
