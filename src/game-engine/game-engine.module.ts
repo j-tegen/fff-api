@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { GameRound } from 'src/game-round/game-round.model';
-import { GameRoundService } from 'src/game-round/game-round.service';
+import { GameRound } from '../game-round/game-round.model';
+import { GameRoundService } from '../game-round/game-round.service';
 import { Action } from '../action/action.model';
 import { ActionService } from '../action/action.service';
 import { Arrow } from '../arrow/arrow.model';

@@ -44,6 +44,15 @@ export class PlayerService {
     return this.repository.save(player);
   }
 
+  async reset(player: Player, { boardSize }: Game): Promise<Player> {
+    return this.repository.save({
+      ...player,
+      isDead: false,
+      direction: Direction.RIGHT,
+      tile: this.getStartingPosition(player.colour, boardSize),
+    });
+  }
+
   async getPlayers(
     gameId: string,
     optional?: Partial<Player>,

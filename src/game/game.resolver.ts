@@ -19,9 +19,14 @@ import { Game } from './game.model';
 import { GameService } from './game.service';
 import { ObjectTile } from '../object-tile/object-tile.model';
 import { Arrow } from '../arrow/arrow.model';
-import { Action } from 'src/action/action.model';
+import { Action } from '../action/action.model';
 import { GameOver } from './dto/game-over.object';
-import { GameRound } from 'src/game-round/game-round.model';
+import { GameRound } from '../game-round/game-round.model';
+import { GameRoundService } from '../game-round/game-round.service';
+import { ResetGameInput } from './dto/reset-game.input';
+import { GraphQLError } from 'graphql';
+import { ErrorCode } from 'src/enums/error-codes.enum';
+import { GameEngineService } from 'src/game-engine/game-engine.service';
 
 @Resolver((of) => Game)
 export class GameResolver {
@@ -29,6 +34,8 @@ export class GameResolver {
     private readonly service: GameService,
     private readonly playerService: PlayerService,
     private readonly objectTileService: ObjectTileService,
+    private readonly roundService: GameRoundService,
+    private readonly engineService: GameEngineService,
     @Inject(PUB_SUB) private pubSub: RedisPubSub,
   ) {}
 
@@ -49,6 +56,23 @@ export class GameResolver {
     return game;
   }
 
+  @Mutation((type) => Boolean)
+  async resetGame(
+    @Args('payload') { gameId, playerId }: ResetGameInput,
+  ): Promise<boolean> {
+    const game: Game = await this.service.get(gameId);
+    if (!game) {
+      throw new GraphQLError(ErrorCode.GAME_NOT_FOUND);
+    }
+    const player: Player = await this.playerService.get(playerId);
+    if (!player?.isOwner) {
+      throw new GraphQLError(ErrorCode.PLAYER_NOT_OWNER);
+    }
+    const players: Player[] = await this.playerService.getPlayers(game.id);
+    await this.engineService.resetGame(game, players);
+    return true;
+  }
+
   @ResolveField((returns) => [Player])
   async players(@Root() { id }: Game): Promise<Player[]> {
     return this.playerService.getPlayers(id);
@@ -57,6 +81,11 @@ export class GameResolver {
   @ResolveField((returns) => [ObjectTile])
   async objectTiles(@Root() { id }: Game): Promise<ObjectTile[]> {
     return this.objectTileService.get(id);
+  }
+
+  @ResolveField((returns) => GameRound)
+  async activeRound(@Root() { id }: Game): Promise<GameRound> {
+    return this.roundService.getActiveRound(id);
   }
 
   @Subscription(() => Player, {
@@ -120,5 +149,14 @@ export class GameResolver {
   })
   gameOver(@Args('gameId') _: string) {
     return this.pubSub.asyncIterator(Subscriptions.GAME_OVER);
+  }
+
+  @Subscription(() => Game, {
+    filter: (payload, variables) => {
+      return payload.gameReset.id === variables.gameId;
+    },
+  })
+  gameReset(@Args('gameId') _: string) {
+    return this.pubSub.asyncIterator(Subscriptions.GAME_RESET);
   }
 }

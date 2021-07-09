@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { GraphQLModule } from '@nestjs/graphql';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ServeStaticModule } from '@nestjs/serve-static';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { GameModule } from './game/game.module';
@@ -13,6 +14,7 @@ import { ArrowModule } from './arrow/arrow.module';
 import { UtilitiesModule } from './utilities/utilities.module';
 import { GameRoundModule } from './game-round/game-round.module';
 import config from './config';
+import { join } from 'path';
 
 @Module({
   imports: [
@@ -26,6 +28,10 @@ import config from './config';
         return { ...req };
       },
     }),
+    ServeStaticModule.forRoot({
+      exclude: ['/graphql*'],
+      rootPath: join(__dirname, '..', 'client/dist'), // New
+    }),
     GameModule,
     PlayerModule,
     GameEngineModule,
@@ -36,7 +42,5 @@ import config from './config';
     UtilitiesModule,
     GameRoundModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
 })
 export class AppModule {}

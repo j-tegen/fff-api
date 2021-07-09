@@ -12,7 +12,7 @@ import { Player } from '../player/player.model';
 import { ObjectTile } from '../object-tile/object-tile.model';
 import { Action } from '../action/action.model';
 import { Arrow } from '../arrow/arrow.model';
-import { GameRound } from 'src/game-round/game-round.model';
+import { GameRound } from '../game-round/game-round.model';
 
 @ObjectType()
 @Entity()
@@ -54,4 +54,7 @@ export class Game {
   @Field()
   @CreateDateColumn()
   createdAt: Date;
+
+  @Field((type) => GameRound, { nullable: true })
+  activeRound: GameRound;
 }

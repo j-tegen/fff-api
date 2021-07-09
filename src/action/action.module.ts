@@ -13,8 +13,8 @@ import { ArrowService } from '../arrow/arrow.service';
 import { ObjectTileService } from '../object-tile/object-tile.service';
 import { Arrow } from '../arrow/arrow.model';
 import { ObjectTile } from '../object-tile/object-tile.model';
-import { GameRoundService } from 'src/game-round/game-round.service';
-import { GameRound } from 'src/game-round/game-round.model';
+import { GameRoundService } from '../game-round/game-round.service';
+import { GameRound } from '../game-round/game-round.model';
 
 @Module({
   imports: [

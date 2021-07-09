@@ -1,5 +1,5 @@
 import { Field, ObjectType } from '@nestjs/graphql';
-import { Player } from 'src/player/player.model';
+import { Player } from '../../player/player.model';
 import { Game } from '../game.model';
 
 @ObjectType()

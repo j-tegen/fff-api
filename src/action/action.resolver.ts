@@ -14,6 +14,8 @@ import { Action } from './action.model';
 import { ActionService } from './action.service';
 import { CreateActionInput } from './dto/create-action.input';
 import { GetActionsArgs } from './dto/get-actions.args';
+import { GameRound } from 'src/game-round/game-round.model';
+import { GameRoundService } from 'src/game-round/game-round.service';
 
 @Resolver((of) => Action)
 export class ActionResolver {
@@ -22,6 +24,7 @@ export class ActionResolver {
     private readonly gameService: GameService,
     private readonly playerService: PlayerService,
     private readonly gameEngine: GameEngineService,
+    private readonly roundService: GameRoundService,
     @Inject(PUB_SUB) private pubSub: RedisPubSub,
   ) {}
 
@@ -39,7 +42,14 @@ export class ActionResolver {
       throw new GraphQLError(ErrorCode.GAME_NOT_FOUND);
     }
     if (game.isResolvingActions) {
-      throw new GraphQLError(ErrorCode.ROUND_STARTED);
+      throw new GraphQLError(ErrorCode.ACTIONS_LOCKED);
+    }
+    const round: GameRound = await this.roundService.getActiveRound(game.id);
+    if (!round) {
+      throw new GraphQLError(ErrorCode.NO_ACTIVE_ROUND);
+    }
+    if (round.roundOver) {
+      throw new GraphQLError(ErrorCode.ROUND_OVER);
     }
     const playerActions: Action[] = await this.service.get({
       gameId: payload.gameId,
@@ -59,7 +69,6 @@ export class ActionResolver {
     });
 
     if (actions.length >= 4 * players.length) {
-      console.log('RESOLVING ACTIONS!');
       await this.gameService.update({ isResolvingActions: true }, game);
       await this.pubSub.publish(Subscriptions.RESOLVE_ACTIONS, {
         resolveActions: game,

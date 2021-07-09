@@ -6,4 +6,5 @@ export enum Subscriptions {
   RESOLVE_ACTIONS = 'RESOLVE_ACTIONS',
   ACTION_ADDED = 'ACTION_ADDED',
   GAME_OVER = 'GAME_OVER',
+  GAME_RESET = 'GAME_RESET',
 }

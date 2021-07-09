@@ -1,10 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { RedisPubSub } from 'graphql-redis-subscriptions';
 import { DateTime } from 'luxon';
-import { ActionService } from 'src/action/action.service';
-import { GameRound } from 'src/game-round/game-round.model';
-import { GameRoundService } from 'src/game-round/game-round.service';
-import { GameService } from 'src/game/game.service';
+import { ActionService } from '../action/action.service';
+import { GameRound } from '../game-round/game-round.model';
+import { GameRoundService } from '../game-round/game-round.service';
+import { GameService } from '../game/game.service';
 import { ActionType } from '../action/action.enums';
 import { Action } from '../action/action.model';
 import { Arrow } from '../arrow/arrow.model';
@@ -77,9 +77,6 @@ export class GameEngineService {
       await this.utilService.sleep(150 - (end - start));
     }
     await this.gameService.update({ isResolvingActions: false }, game);
-    await this.pubSub.publish(Subscriptions.ACTIONS_RESOLVED, {
-      actionsResolved: game,
-    });
     const alivePlayers: Player[] = await this.playerService.getPlayers(
       game.id,
       {
@@ -88,6 +85,10 @@ export class GameEngineService {
     );
     if (alivePlayers.length <= 1) {
       this.handleGameOver(alivePlayers, game);
+    } else {
+      await this.pubSub.publish(Subscriptions.ACTIONS_RESOLVED, {
+        actionsResolved: game,
+      });
     }
   }
 
@@ -95,9 +96,13 @@ export class GameEngineService {
     const winnerId: string = !!alivePlayers.length
       ? alivePlayers[0]?.id
       : undefined;
-    const round: GameRound = await this.roundService.create(game.id, winnerId);
+    const round: GameRound = await this.roundService.getActiveRound(game.id);
+    const updatedRound: GameRound = await this.roundService.update(round, {
+      winnerId,
+      roundOver: true,
+    });
     await this.pubSub.publish(Subscriptions.GAME_OVER, {
-      gameOver: round,
+      gameOver: updatedRound,
     });
   }
 
@@ -168,6 +173,17 @@ export class GameEngineService {
         return updatedPlayer;
       }
       return player;
+    });
+  }
+
+  async resetGame(game: Game, players: Player[]): Promise<void> {
+    for (const player of players) {
+      await this.playerService.reset(player, game);
+    }
+    await this.objectTileService.removeAll(game);
+    await this.objectTileService.addObjectTiles(game);
+    await this.pubSub.publish(Subscriptions.GAME_RESET, {
+      gameReset: game,
     });
   }
 }

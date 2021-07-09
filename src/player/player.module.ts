@@ -6,9 +6,17 @@ import { Game } from '../game/game.model';
 import { Player } from './player.model';
 import { UtilitiesService } from '../utilities/utilities.service';
 import { GameService } from '../game/game.service';
+import { GameRound } from 'src/game-round/game-round.model';
+import { GameRoundService } from 'src/game-round/game-round.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Game, Player])],
-  providers: [PlayerService, PlayerResolver, UtilitiesService, GameService],
+  imports: [TypeOrmModule.forFeature([Game, Player, GameRound])],
+  providers: [
+    PlayerService,
+    PlayerResolver,
+    UtilitiesService,
+    GameService,
+    GameRoundService,
+  ],
 })
 export class PlayerModule {}

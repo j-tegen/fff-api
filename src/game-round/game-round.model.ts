@@ -9,7 +9,7 @@ import {
 import { ObjectType, Field } from '@nestjs/graphql';
 import { nanoid } from 'nanoid';
 import { Player } from '../player/player.model';
-import { Game } from 'src/game/game.model';
+import { Game } from '../game/game.model';
 
 @ObjectType()
 @Entity()
@@ -18,11 +18,11 @@ export class GameRound {
   @PrimaryColumn('varchar', { length: 10, default: () => `'${nanoid()}'` })
   id: string;
 
-  @Field((type) => Player)
+  @Field((type) => Player, { nullable: true })
   @ManyToOne((type) => Player, (player) => player.wonRounds)
   winner: Player;
 
-  @Column()
+  @Column({ nullable: true })
   winnerId: string;
 
   @Field((type) => Game)
@@ -31,6 +31,10 @@ export class GameRound {
 
   @Column()
   gameId: string;
+
+  @Field((type) => Boolean)
+  @Column('boolean', { default: false })
+  roundOver: boolean;
 
   @Field()
   @CreateDateColumn()

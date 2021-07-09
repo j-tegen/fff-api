@@ -18,6 +18,10 @@ export class ObjectTileService {
     return this.repository.find({ where: { gameId } });
   }
 
+  async removeAll(game: Game): Promise<void> {
+    await this.repository.delete({ gameId: game.id });
+  }
+
   async addObjectTiles(game: Game): Promise<ObjectTile[]> {
     const spikes: Partial<ObjectTile>[] = this.getSpikes(game);
     const holes: Partial<ObjectTile>[] = this.getHoles(game);

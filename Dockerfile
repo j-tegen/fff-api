@@ -16,5 +16,6 @@ COPY tsconfig.json .
 COPY tsconfig.build.json .
 
 COPY ./src ./src
+COPY ./client ./client
 
 EXPOSE 8090
